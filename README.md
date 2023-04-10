@@ -15,7 +15,7 @@ if ("geolocation" in navigator) {
     // 3. Make an API call to OpenWeatherMap to get the current weather data
     // Use the "exclude" parameter to exclude all weather data except hourly forecast
     // Use the "units" parameter to specify units (e.g. metric or imperial)
-    const url = `${API_URL}?lat=${latitude}&lon=${longitude}&exclude=current,minutely,daily,alerts&units=metric&appid=${API_KEY}`;
+   const url = `${API_URL}?lat=${latitude}&lon=${longitude}&exclude=current,minutely,daily,alerts&units=metric&appid=${API_KEY}`;
     fetch(url)
       .then(response => {
         if (!response.ok) {
@@ -27,10 +27,10 @@ if ("geolocation" in navigator) {
         const hourlyData = data.hourly;
 
         // 5. Check if there is a high chance of rain in the next hour
-        const willRain = hourlyData[0].pop > 0.5;
+   const willRain = hourlyData[0].pop > 0.5;
 
         // 6. Alert the user if there is a high chance of rain
-        if (willRain) {
+   if (willRain) {
           alert("There is a high chance of rain in the next hour!");
         }
       })
