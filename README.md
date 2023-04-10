@@ -1,8 +1,9 @@
 # Rainning-Alarm
 An app that's warn the user if there will be a high chance of raining in the next hour
 // 1. Define API URL and API key
-const API_URL = "https://api.openweathermap.org/data/3.0/onecall";
-const API_KEY = "YOUR_API_KEY_HERE";
+const API_URL = const API_URL = "https://api.openweathermap.org/data/3.0/onecall";
+const API_KEY = "e71f41462402ed8af85f57e58283926b";
+const url = `${API_URL}?lat=${LATITUDE}&lon=${LONGITUDE}&exclude=${PART}&appid=${API_KEY}`;
 
 // 2. Get user's location (latitude and longitude)
 // You can use the Geolocation API to get the user's location
