@@ -3,49 +3,56 @@ import json
 import time
 import tkinter as tk
 from tkinter import ttk
+import tkinter.messagebox as messagebox
+import threading
 
-def get_weather(city):
+def get_rain_probability(city):
     api_key = "e71f41462402ed8af85f57e58283926b"
-    base_url = "http://api.openweathermap.org/data/2.5/weather?"
-    complete_url = base_url + "appid=" + api_key + "&q=" + city
 
-    response = requests.get(complete_url)
-
-    x = response.json()
-
-    if x["cod"] != "404":
-        y = x["main"]
-        current_temperature = y["temp"] - 273.15
-        current_pressure = y["pressure"]
-        current_humidity = y["humidity"]
-        z = x["weather"]
-        weather_description = z[0]["description"]
-        lat = x['coord']['lat']
-        lon = x['coord']['lon']
-        output_text = " Temperature (in C unit) = " + str(current_temperature) + "\n atmospheric pressure (in hPa unit) = " + str(current_pressure) + "\n humidity (in percentage) = " + str(current_humidity) + "\n description = " + str(weather_description) + "\n latitude = " + str(lat) + "\n longitude = " + str(lon)
-
-        # getting the forecast data
-        forecast_base_url = "https://api.openweathermap.org/data/2.5/forecast?"
-        forecast_url = forecast_base_url + "appid=" + api_key + "&q=" + city + "&units=metric"
-        forecast_response = requests.get(forecast_url)
+    # Getting the forecast data
+    forecast_base_url = "https://api.openweathermap.org/data/2.5/forecast?"
+    forecast_url = forecast_base_url + "appid=" + api_key + "&q=" + city + "&units=metric"
+    try:
+        forecast_response = requests.get(forecast_url, timeout=10)
+        forecast_response.raise_for_status()
         forecast_data = forecast_response.json()
 
-        # extracting the forecast for the next hour
+        # Extracting the forecast for the next hour
         next_hour_forecast = forecast_data["list"][0]
         next_hour_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(next_hour_forecast['dt']))
-        next_hour_precipitation = next_hour_forecast['pop']
-        output_text += f"\nNext hour precipitation probability for {city} at {next_hour_time} is {next_hour_precipitation}%"
+        next_hour_precipitation = next_hour_forecast['pop'] * 100
 
-    else:
-        output_text = "City Not Found"
+        print(f"Forecast data for {city}:")
+        print(f"Time: {next_hour_time}")
+        print(f"Rain probability: {next_hour_precipitation}")
 
-    return output_text
+        return next_hour_precipitation >= 50
+    except (requests.exceptions.RequestException, ValueError):
+        print(f"Unable to get forecast data for {city}")
+        return False
+
+
+import threading
+
+
+def check_rain_probability(city):
+    def check_loop():
+        while True:
+            rain_probability = get_rain_probability(city)
+            if rain_probability:
+                messagebox.showwarning("Rain Alert",
+                                       f"There's a greater than or equal to 50% chance of rain in {city} in the next hour.")
+                break
+            else:
+                time.sleep(600)
+
+    t = threading.Thread(target=check_loop)
+    t.start()
 
 
 def get_weather_btn_click():
     city = city_entry.get()
-    weather_text = get_weather(city)
-    output_text_label.config(text=weather_text)
+    check_rain_probability(city)
 
 
 # Create the main window and set its title
@@ -74,7 +81,7 @@ city_entry = ttk.Entry(root, width=30)
 city_entry.grid(column=1, row=0)
 
 # Create a button to get the weather
-get_weather_btn = ttk.Button(root, text="Get Weather", command=get_weather_btn_click)
+get_weather_btn = ttk.Button(root, text="Get Rain Probability", command=get_weather_btn_click)
 get_weather_btn.grid(column=2, row=0)
 
 # Create a label for the output text
