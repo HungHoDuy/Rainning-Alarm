@@ -2,7 +2,6 @@ import tkinter as tk
 import tkinter.messagebox as messagebox
 import threading
 import requests
-import json
 import time
 
 
